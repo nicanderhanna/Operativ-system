@@ -10,75 +10,94 @@
 #include <sys/types.h>
 
 int num_threads = 0;
-float array[1000000];
-float *partial_sums;
 struct timeval start, end;
+double *array;
+int array_size;
+int bin = 30;
+int *partial_hist;
+pthread_mutex_t hist_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 pthread_mutex_t id_mutex = PTHREAD_MUTEX_INITIALIZER;
 int next_id = 0; // global för att ge unika IDs till trådarna
 
 void *thread_func(); /* the thread function */
 
+
+
 int main(int argc, char *argv[])
 {
 num_threads = atoi(argv[1]);
+array_size = atoi(argv[2]);
+array = malloc(array_size * sizeof(double));
 /* Initialize an array of random values */
 srand(time(NULL));
-for (int i=0; i<1000000; i++){
-  float x = rand() % 2;
-  array[i] = x;
+for (int i=0; i<array_size; i++){
+    array[i] = (double)rand() / (double)RAND_MAX;
 }
-/* Perform Serial Sum */
-float sum_serial = 0.0;
-double time_serial = 0.0;
-//Timer Begin
+
+ // ----------------------------- Seriell histogram ------------------------
+int hist_serial[bin];
+for (int i = 0; i < bin; i++) hist_serial[i] = 0;
 
 gettimeofday(&start, NULL);
-
-for (int i=0; i<1000000 ; i++){
-  int x = array[i];
-  sum_serial += x;
+for (int i = 0; i < array_size; i++) {
+    int bin_index = (int)(array[i] * bin);
+    if (bin_index == bin) bin_index = bin - 1;
+    hist_serial[bin_index]++;
 }
-
 gettimeofday(&end, NULL);
-//Timer End
 
-time_serial = (end.tv_sec - start.tv_sec) * 1000.0;
-time_serial += (end.tv_usec - start.tv_usec) / 1000.0;
+double time_hist_serial = (end.tv_sec - start.tv_sec) * 1000.0;
+time_hist_serial += (end.tv_usec - start.tv_usec) / 1000.0;
 
-printf("Serial Sum = %f, time = %.3f \n", sum_serial, time_serial);
-/* Create a pool of num_threads workers and keep them in workers */
-partial_sums = malloc(num_threads * sizeof(float));
+printf("Serial Histogram:\n");
+for (int i = 0; i < bin; i++)
+    printf("Bin %d: %d\n", i, hist_serial[i]);
+printf("Serial histogram time = %.3f ms\n", time_hist_serial);
+
+/*-------------------------------Serial histogram ----------------------*/
+
+/*--------------------------Parallel histogram---------------------------- */
+// Allokera partial_hist INNAN vi startar threads
+partial_hist = calloc(bin, sizeof(int));
 pthread_t *workers = malloc(num_threads * sizeof(pthread_t));
-double time_parallel = 0.0;
-double sum_parallel = 0.0;
+
+double time_hist_parallel = 0.0;
 
 //Timer Begin
 gettimeofday(&start, NULL);
 for (int i = 0; i < num_threads; i++) {
-pthread_attr_t attr;
-pthread_attr_init(&attr);
-pthread_create(&workers[i], &attr, thread_func, NULL);
+    pthread_attr_t attr;
+    pthread_attr_init(&attr);
+    pthread_create(&workers[i], &attr, thread_func, NULL);
 }
 for (int i = 0; i < num_threads; i++)
-pthread_join(workers[i], NULL);
+    pthread_join(workers[i], NULL);
 //Timer End
 gettimeofday(&end, NULL);
 
-for (int i = 0; i < num_threads; i++)
-        sum_parallel += partial_sums[i];
+time_hist_parallel = (end.tv_sec - start.tv_sec) * 1000.0;
+time_hist_parallel += (end.tv_usec - start.tv_usec) / 1000.0;
 
-time_parallel = (end.tv_sec - start.tv_sec) * 1000.0;
-time_parallel += (end.tv_usec - start.tv_usec) / 1000.0;
+printf("\nParallel Histogram:\n");
+for (int i = 0; i < bin; i++)
+    printf("Bin %d: %d\n", i, partial_hist[i]);
+printf("Parallel histogram time = %.3f ms\n", time_hist_parallel);
 
-printf("Parallel Sum %f = , time = %.3f \n", sum_parallel, time_parallel);
-/*free up resources properly */
+
+/*--------------------------Parallel histogram---------------------------- */
+
+
+free(array);
+free(partial_hist);
 free(workers);
-free(partial_sums);
 
 return 0;
 }
 
+
+
+/* --------------------------thread function----------------------- */
 
 void *thread_func() {
 /* Assign each thread an id so that they are unique in range [0, num_thread -1
@@ -88,18 +107,23 @@ int my_id = next_id++;
 pthread_mutex_unlock(&id_mutex);
 
 /* Perform Partial Parallel Sum Here */
-int chunk = 1000000 / num_threads;
+int chunk = array_size / num_threads;
 int start_index = my_id * chunk;
-int end_index = (my_id == num_threads-1) ? 1000000 : start_index + chunk;
+int end_index = (my_id == num_threads-1) ? array_size : start_index + chunk;
 
-float my_sum = 0.0;
+int *thread_hist = calloc(bin, sizeof(int));
 
 for (int i = start_index; i < end_index; i++) {
-    my_sum += array[i];
+    int bin_index = (int)(array[i] * bin);
+    if (bin_index == bin) bin_index = bin-1;
+    thread_hist[bin_index]++;
 }
 
-partial_sums[my_id] = my_sum;
+pthread_mutex_lock(&hist_mutex);
+for (int i = 0; i < bin ; i++)
+    partial_hist[i] += thread_hist[i];
+pthread_mutex_unlock(&hist_mutex);
 
-printf("Thread %d sum = %f\n", my_id, my_sum);
+free(thread_hist);
 pthread_exit(0);
 }
