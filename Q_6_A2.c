@@ -15,7 +15,7 @@ float *partial_sums;
 struct timeval start, end;
 
 pthread_mutex_t id_mutex = PTHREAD_MUTEX_INITIALIZER;
-int next_id = 0; // global för att ge unika IDs till trådarna
+int next_id = 0;
 
 void *thread_func(); /* the thread function */
 
