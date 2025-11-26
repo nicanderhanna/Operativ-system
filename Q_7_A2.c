@@ -18,7 +18,7 @@ int *partial_hist;
 pthread_mutex_t hist_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 pthread_mutex_t id_mutex = PTHREAD_MUTEX_INITIALIZER;
-int next_id = 0; // global för att ge unika IDs till trådarna
+int next_id = 0;
 
 void *thread_func(); /* the thread function */
 
@@ -58,7 +58,6 @@ printf("Serial histogram time = %.3f ms\n", time_hist_serial);
 /*-------------------------------Serial histogram ----------------------*/
 
 /*--------------------------Parallel histogram---------------------------- */
-// Allokera partial_hist INNAN vi startar threads
 partial_hist = calloc(bin, sizeof(int));
 pthread_t *workers = malloc(num_threads * sizeof(pthread_t));
 
@@ -86,16 +85,12 @@ printf("Parallel histogram time = %.3f ms\n", time_hist_parallel);
 
 
 /*--------------------------Parallel histogram---------------------------- */
-
-
 free(array);
 free(partial_hist);
 free(workers);
 
 return 0;
 }
-
-
 
 /* --------------------------thread function----------------------- */
 
