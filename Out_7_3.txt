@@ -1,0 +1,66 @@
+❯ ./Q_7_A2 3  1000000
+Serial Histogram:
+Bin 0: 33353
+Bin 1: 33024
+Bin 2: 33374
+Bin 3: 33509
+Bin 4: 33245
+Bin 5: 33083
+Bin 6: 33217
+Bin 7: 33529
+Bin 8: 33481
+Bin 9: 33237
+Bin 10: 33596
+Bin 11: 33294
+Bin 12: 33366
+Bin 13: 33263
+Bin 14: 33447
+Bin 15: 33052
+Bin 16: 33422
+Bin 17: 33422
+Bin 18: 33500
+Bin 19: 33131
+Bin 20: 33366
+Bin 21: 33225
+Bin 22: 33126
+Bin 23: 33506
+Bin 24: 33469
+Bin 25: 33285
+Bin 26: 33493
+Bin 27: 33296
+Bin 28: 33280
+Bin 29: 33409
+Serial histogram time = 2.283 ms
+
+Parallel Histogram:
+Bin 0: 33353
+Bin 1: 33024
+Bin 2: 33374
+Bin 3: 33509
+Bin 4: 33245
+Bin 5: 33083
+Bin 6: 33217
+Bin 7: 33529
+Bin 8: 33481
+Bin 9: 33237
+Bin 10: 33596
+Bin 11: 33294
+Bin 12: 33366
+Bin 13: 33263
+Bin 14: 33447
+Bin 15: 33052
+Bin 16: 33422
+Bin 17: 33422
+Bin 18: 33500
+Bin 19: 33131
+Bin 20: 33366
+Bin 21: 33225
+Bin 22: 33126
+Bin 23: 33506
+Bin 24: 33469
+Bin 25: 33285
+Bin 26: 33493
+Bin 27: 33296
+Bin 28: 33280
+Bin 29: 33409
+Parallel histogram time = 0.902 ms
