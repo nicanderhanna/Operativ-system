@@ -1,12 +1,10 @@
-// #define _POSIX_C_SOURCE 200809L
-// #define _DEFAULT_SOURCE 
 #define _GNU_SOURCE
 
 
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
-// #include <malloc.h> 
+#include <malloc.h> 
 #include <sys/types.h>
 #include <sys/mman.h>
 #include <time.h>
@@ -39,14 +37,14 @@ int main(int argc, char** argv){
 
   // Option 1: @Add mmap below to allocate num_pages anonymous pages 
   // -------------------------------Option 1---------------------
-  // addr = (char*) mmap(NULL, total_size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+   addr = (char*) mmap(NULL, total_size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
  // -------------------------------Option 1---------------------
 
   // -------------------------------Option 2---------------------
 
   // Option 2: @Add mmap below to allocate num_pages anonymous pages but using Ausing "huge" pages
   //addr = (char*) mmap( ... );
-  addr = (char*) mmap(NULL, total_size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_HUGETLB, -1, 0);
+  //addr = (char*) mmap(NULL, total_size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_HUGETLB, -1, 0);
   
    // -------------------------------Option 1---------------------
 
